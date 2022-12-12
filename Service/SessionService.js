@@ -16,14 +16,55 @@ class SessionService {
             return
         }
 
-        const code = text;
+        const code = text.trim();
 
-        const answers = await AnswersController.withСode(code)
+        const isCorrect = /[0-9]{6}/.test(code);
 
-        if (answers == null) {
+        if (!isCorrect) {
+            await ctx.reply("<b>Неверный код викторины.</b>\n\nКод викторины состоит <b>ТОЛЬКО</b> из чисел.\n\nПример: <b>346108</b>",
+                {
+                    reply_markup: Keyboard.again,
+                    parse_mode: "HTML"
+                });
+            return
+        }
+
+        const { answers } = await AnswersController.withСode(code);
+
+        if (!answers) {
             await ctx.reply("Неккоректный код викторины", { reply_markup: Keyboard.again });
             return
         }
+
+        for (const item of answers) {
+
+            const question = item.question.text.split(">")[1].split("<")[0].trim();
+            const answers = item.answers;
+            const typeQuestion = item.type;
+
+            const formatAnswers = await AnswersController.formatAnswers(answers, typeQuestion);
+
+            if (!formatAnswers) {
+                await ctx.reply(`<b>${question}</b>\n\n<b>Ответ: </b>Бот не может получить ответ на этот вопрос.`,
+                    {
+                        reply_markup: Keyboard.again,
+                        parse_mode: "HTML"
+                    }
+                );
+            } else {
+
+                let sendAnswer = formatAnswers.join("");
+
+                await ctx.reply(`<b>${question}</b>\n\n<b>Ответ: </b>${sendAnswer}`,
+                    {
+                        reply_markup: Keyboard.again,
+                        parse_mode: "HTML"
+                    }
+                );
+            }
+
+        }
+
 
     }
 }

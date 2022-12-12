@@ -35,6 +35,11 @@ bot.on("message:text", async (ctx) => {
         return
     }
 
+    if (message === "🔄 Еще раз") {
+        await TextController.answers(ctx)
+        return
+    }
+
     if (message === "🔙 Назад") {
         await TextController.back(ctx)
     }

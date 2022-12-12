@@ -1,3 +1,4 @@
+import Keyboard from "../Keyboard/index.js";
 import SessionService from "../Service/SessionService.js";
 
 class SessionController {
@@ -12,6 +13,7 @@ class SessionController {
 
         } catch (e) {
             console.log("Не удалось выполнить сессию\n\n", e);
+            await ctx.reply("Бот не смог получить ответы на викторину", { reply_markup: Keyboard.again });
         }
     }
 }

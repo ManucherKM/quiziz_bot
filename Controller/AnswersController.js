@@ -16,6 +16,20 @@ class AnswersController {
 
         return answers
     }
+
+    async formatAnswers(answer, typeQuestion) {
+        if (!answer || !typeQuestion) {
+            return
+        }
+
+        const result = await AnswersService.formatAnswers(answer, typeQuestion);
+
+        if (result.length === 0) {
+            return
+        }
+
+        return result
+    }
 }
 
 export default new AnswersController
