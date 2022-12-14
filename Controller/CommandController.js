@@ -6,15 +6,17 @@ class CommandController {
         try {
 
             if (!ctx) {
+                console.log("Пустой контекст");
                 return
             }
 
             await CommandService.start(ctx)
 
         } catch (e) {
-            console.log("Не удалось выполнить команду start\n\n", e);
+            console.log(e);
         }
     }
+    
 }
 
 export default new CommandController

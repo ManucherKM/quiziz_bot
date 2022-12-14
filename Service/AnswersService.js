@@ -9,6 +9,7 @@ class AnswersService {
         const { data } = await fetchData.json();
 
         if (!data) {
+            console.log("Ошибка quizit");
             return
         }
 
@@ -16,20 +17,16 @@ class AnswersService {
     }
 
     async formatAnswers(answer, typeQuestion) {
+
         const result = [];
 
         if (typeQuestion == "MSQ") {
-
             for (let i = 0; i < answer.length; i++) {
                 const item = answer[i];
 
-                let newAnswer = ""
-
-                if (i === answer.length - 1) {
-                    newAnswer = item.text.replace("<p>", "").replace("</p>", "");
-                } else {
-                    newAnswer = item.text.replace("<p>", "").replace("</p>", ", ");
-                }
+                const newAnswer = item.text
+                    .replace("<p>", `${i + 1}) `)
+                    .replace("</p>", "\n");
 
                 result.push(newAnswer);
             }
@@ -37,15 +34,20 @@ class AnswersService {
         }
 
         if (typeQuestion == "MCQ") {
-            const newAnswer = answer[0].text.replace("<p>", "").replace("</p>", "");
+
+            const newAnswer = answer[0].text
+                .replace("<p>", "")
+                .replace("</p>", "");
+
             result.push(newAnswer)
         }
 
         if (typeQuestion == "BLANK") {
             for (let i = 0; i < answer.length; i++) {
+
                 const item = answer[i];
 
-                let newAnswer = `\n${i + 1}) ${item.text}`;
+                const newAnswer = `${i + 1}) ${item.text}\n`;
 
                 result.push(newAnswer);
             }
@@ -56,7 +58,9 @@ class AnswersService {
 
                 const item = answer[i];
 
-                let newAnswer = item.text.replace("<p>", `\n${i + 1}) `).replace("</p>", "");
+                const newAnswer = item.text
+                    .replace("<p>", `${i + 1}) `)
+                    .replace("</p>", "\n");
 
                 result.push(newAnswer);
             }
@@ -67,8 +71,8 @@ class AnswersService {
             for (let i = 0; i < answer.length; i++) {
                 const item = answer[i];
 
-                let newAnswer = item.text
-                    .replace('<div class="match"><p>', `\n${i + 1}) `)
+                const newAnswer = item.text
+                    .replace('<div class="match"><p>', `${i + 1}) `)
                     .replace("</p> -> <p>", " => ")
                     .replace("</p></div>", "\n");
 

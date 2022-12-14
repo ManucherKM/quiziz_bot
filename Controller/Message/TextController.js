@@ -5,21 +5,21 @@ class TextController {
     async profile(ctx) {
         try {
             if (!ctx) {
-                console.log("Ошибка профиля");
+                console.log("Пустой контекст профиля");
                 return
             }
 
             await TextService.profile(ctx)
 
         } catch (e) {
-            console.log("Не удалось перейти в профиль\n\n", e);
+            console.log(e);
         }
     }
 
     async back(ctx) {
         try {
             if (!ctx) {
-                console.log("Ошибка возвращения");
+                console.log("Пустой контекст возвращения");
                 return
             }
 
@@ -33,7 +33,7 @@ class TextController {
     async answers(ctx) {
         try {
             if (!ctx) {
-                console.log("Ошибка при получении ответов");
+                console.log("Пустой контекст ответов");
                 return
             }
 

@@ -4,20 +4,32 @@ import Keyboard from "../../Keyboard/index.js";
 class TextSevice {
 
     async profile(ctx) {
-        const { id } = ctx.chat;
 
-        const user = await UserController.getUser(id);
+        const senderInfo = ctx.from;
 
-        if (!user) {
-            throw new Error("Не удалось найти пользователя");
+        const candidate = await UserController.get(senderInfo.id);
+
+        if (!candidate) {
+            throw new Error("Кандидат не найден в БД");
         }
 
-        const infoId = `<b>ID:</b> ${user.id}\n\n`;
-        const infoName = `<b>Имя пользователя:</b> ${user.name}\n\n`;
-        const infoUser = `<b>Пользователь:</b> <a href="t.me/${user.firstName}">${user.name}</a>\n\n`;
+        const { is_bot, language_code, ...otherInfo } = senderInfo;
+
+        const user = await UserController.create(otherInfo);
+
+        if (!user) {
+            await ctx.reply("Похоже, что бот решил немного отдохнуть😴", { reply_markup: Keyboard.back });
+            throw new Error("Не удалось создать пользователя");
+        }
+
+        const message = {
+            id: `<b>ID:</b> ${user.id}\n\n`,
+            name: `<b>Имя пользователя:</b> ${user.first_name}\n\n`,
+            user: `<b>Пользователь:</b> <a href="t.me/${user.username}">${user.first_name}</a>\n\n`
+        }
 
         await ctx.reply(
-            `${infoId}${infoName}${infoUser}`,
+            `${message.id}${message.name}${message.user}`,
             {
                 parse_mode: "HTML",
                 reply_markup: Keyboard.back

@@ -7,21 +7,25 @@ class SessionService {
 
         await ctx.reply("Введите код викторины.", { reply_markup: Keyboard.back });
 
-        const { message: { text } } = await conversation.wait();
+        const message = await conversation.wait();
+
+        const textMessage = message.update.message.text
 
         const textKeyboardBack = Keyboard.back.keyboard[0][0].text;
 
-        if (text === textKeyboardBack) {
+        if (textMessage === textKeyboardBack) {
             await ctx.reply("Главное меню", { reply_markup: Keyboard.start });
             return
         }
 
-        const code = text.trim();
+        const code = textMessage.trim();
 
         const isCorrect = /[0-9]{6}/.test(code);
 
+        const textErr = "<b>Неверный код викторины.</b>\n\nКод викторины состоит <b>ТОЛЬКО</b> из чисел.\n\nПример: <b>346108</b>";
+
         if (!isCorrect) {
-            await ctx.reply("<b>Неверный код викторины.</b>\n\nКод викторины состоит <b>ТОЛЬКО</b> из чисел.\n\nПример: <b>346108</b>",
+            await ctx.reply(textErr,
                 {
                     reply_markup: Keyboard.again,
                     parse_mode: "HTML"
@@ -36,36 +40,59 @@ class SessionService {
             return
         }
 
-        for (const item of answers) {
+        let countAnswers = 0;
+
+        const sizeAnswers = answers.length;
+
+        for (let i = 0; i < sizeAnswers; i++) {
+
+            const item = answers[i];
 
             const question = item.question.text.split(">")[1].split("<")[0].trim();
-            const answers = item.answers;
+            const answer = item.answers;
             const typeQuestion = item.type;
 
-            const formatAnswers = await AnswersController.formatAnswers(answers, typeQuestion);
+            const formatAnswers = await AnswersController.formatAnswers(answer, typeQuestion);
 
             if (!formatAnswers) {
-                await ctx.reply(`<b>${question}</b>\n\n<b>Ответ: </b>Бот не может получить ответ на этот вопрос.`,
+
+                const textErrAnswer = `<b>${question}</b>\n\n<b>Ответ:\n\n</b>Бот не может получить ответ на этот вопрос.`;
+
+                await ctx.reply(textErrAnswer,
                     {
                         reply_markup: Keyboard.again,
                         parse_mode: "HTML"
                     }
                 );
+
             } else {
+                countAnswers++
 
-                let sendAnswer = formatAnswers.join("");
+                const sendAnswer = formatAnswers.join("");
 
-                await ctx.reply(`<b>${question}</b>\n\n<b>Ответ: </b>${sendAnswer}`,
+                const sendText = `<b>Вопрос ${i + 1}:</b>\n\n${question}\n\n<b>Ответ:\n\n</b>${sendAnswer}`;
+
+                await ctx.reply(sendText,
                     {
-                        reply_markup: Keyboard.again,
                         parse_mode: "HTML"
                     }
                 );
+
+                const isLast = i === sizeAnswers - 1;
+
+                if (isLast) {
+
+                    const sendStats = `Бот нашел ответы на <b>${countAnswers}</b> вопросов из <b>${sizeAnswers}</b>`;
+
+                    await ctx.reply(sendStats,
+                        {
+                            reply_markup: Keyboard.again,
+                            parse_mode: "HTML"
+                        }
+                    );
+                }
             }
-
         }
-
-
     }
 }
 
